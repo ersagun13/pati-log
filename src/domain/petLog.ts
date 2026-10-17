@@ -44,6 +44,15 @@ export function validateEntry(value: unknown): string | null {
   return null;
 }
 
+export function hasUniqueEntryIds(entries: Entry[]): boolean {
+  const ids = new Set<string>();
+  for (const entry of entries) {
+    if (ids.has(entry.id)) return false;
+    ids.add(entry.id);
+  }
+  return true;
+}
+
 export function addEntry(entries: Entry[], entry: Entry): Entry[] {
   const problem = validateEntry(entry);
   if (problem) throw new Error(problem);
@@ -83,7 +92,7 @@ export function restoreEntry(entries: Entry[], deleted: Entry): Entry[] {
 }
 
 export function exportEntries(entries: Entry[]): string {
-  if (!Array.isArray(entries) || entries.some((entry) => validateEntry(entry) !== null)) {
+  if (!Array.isArray(entries) || entries.some((entry) => validateEntry(entry) !== null) || !hasUniqueEntryIds(entries)) {
     throw new Error("Cannot export an invalid entry list.");
   }
 

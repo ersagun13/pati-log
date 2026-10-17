@@ -42,7 +42,7 @@ test("the form labels every value it asks a person to enter", () => {
 
 test("the list exposes dates, deletion, and undo to assistive technology", () => {
   assert.match(list, /<time\b[^>]*dateTime=\{entry\.date\}/);
-  assert.match(list, /aria-label=\{`Delete entry/);
+  assert.match(list, /aria-label=\{deleteEntryLabel\(entry, index, entries\.length\)\}/);
   assert.match(list, /role="status"/);
   assert.match(list, />Undo</);
 });

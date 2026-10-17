@@ -84,3 +84,12 @@ test("exportEntries creates a versioned JSON backup that round-trips", () => {
   assert.equal(backup.version, 1);
   assert.deepEqual(backup.entries, entries);
 });
+
+test("exportEntries rejects duplicate entry IDs", () => {
+  const exportEntries = requireFunction("exportEntries");
+
+  assert.throws(
+    () => exportEntries([note(), note({ note: "A second entry with the same ID." })]),
+    /invalid entry list/i,
+  );
+});

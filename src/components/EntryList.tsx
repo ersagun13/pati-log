@@ -1,4 +1,5 @@
 import type { Entry } from "../domain/petLog.ts";
+import { deleteEntryLabel } from "./entryLabels.ts";
 
 interface EntryListProps {
   entries: Entry[];
@@ -63,7 +64,7 @@ export function EntryList({ entries, reminders, deletedEntry, onDelete, onUndo }
         </div>
       ) : (
         <ul className="entry-list" aria-label="Notebook entries">
-          {entries.map((entry) => (
+          {entries.map((entry, index) => (
             <li className="entry-card" key={entry.id}>
               <div className="entry-card-top">
                 <span className={`entry-kind entry-kind-${entry.kind}`}>{kindLabel(entry)}</span>
@@ -71,7 +72,7 @@ export function EntryList({ entries, reminders, deletedEntry, onDelete, onUndo }
                 <button
                   className="remove-button"
                   type="button"
-                  aria-label={`Delete entry from ${entry.date}`}
+                  aria-label={deleteEntryLabel(entry, index, entries.length)}
                   onClick={() => onDelete(entry.id)}
                 >
                   Remove

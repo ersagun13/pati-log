@@ -54,6 +54,15 @@ test("saveEntries writes the current version and loadEntries restores it", () =>
   assert.equal(result.status, "ready");
 });
 
+test("saveEntries rejects duplicate entry IDs", () => {
+  const saveEntries = requireFunction("saveEntries");
+  const storage = new MemoryStorage();
+  const duplicate = { ...validEntry, note: "A second entry with the same ID." };
+
+  assert.throws(() => saveEntries(storage, [validEntry, duplicate]), /invalid entry list/i);
+  assert.equal(storage.getItem("pati-log"), null);
+});
+
 test("loadEntries preserves corrupt data and returns a recovery message", () => {
   const loadEntries = requireFunction("loadEntries");
   const storage = new MemoryStorage();
@@ -78,6 +87,19 @@ test("loadEntries reports unsupported storage versions without deleting them", (
   assert.equal(result.status, "corrupt");
   assert.deepEqual(result.entries, []);
   assert.equal(storage.getItem("pati-log"), unsupported);
+});
+
+test("loadEntries rejects duplicate IDs and leaves the saved notebook untouched", () => {
+  const loadEntries = requireFunction("loadEntries");
+  const storage = new MemoryStorage();
+  const raw = JSON.stringify({ version: 1, entries: [validEntry, { ...validEntry, note: "Duplicate ID." }] });
+  storage.setItem("pati-log", raw);
+
+  const result = loadEntries(storage);
+
+  assert.equal(result.status, "corrupt");
+  assert.deepEqual(result.entries, []);
+  assert.equal(storage.getItem("pati-log"), raw);
 });
 
 test("loadEntries reports unavailable browser storage without throwing", () => {

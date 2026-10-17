@@ -1,4 +1,4 @@
-import { validateEntry, type Entry } from "./domain/petLog.ts";
+import { hasUniqueEntryIds, validateEntry, type Entry } from "./domain/petLog.ts";
 
 export const STORAGE_KEY = "pati-log";
 export const STORAGE_VERSION = 1;
@@ -51,12 +51,16 @@ export function loadEntries(storage: StorageLike | null): StorageLoadResult {
     return corruptResult("This saved notebook format is not supported here. The saved data was left untouched.");
   }
   if (notebook.entries.some((entry) => validateEntry(entry) !== null)) return corruptResult();
+  const entries = notebook.entries as Entry[];
+  if (!hasUniqueEntryIds(entries)) {
+    return corruptResult("Saved entries contain duplicate IDs. The saved data was left untouched.");
+  }
 
-  return { entries: notebook.entries as Entry[], status: "ready", message: null };
+  return { entries, status: "ready", message: null };
 }
 
 export function saveEntries(storage: StorageLike, entries: Entry[]): void {
-  if (!Array.isArray(entries) || entries.some((entry) => validateEntry(entry) !== null)) {
+  if (!Array.isArray(entries) || entries.some((entry) => validateEntry(entry) !== null) || !hasUniqueEntryIds(entries)) {
     throw new Error("Cannot save an invalid entry list.");
   }
 
